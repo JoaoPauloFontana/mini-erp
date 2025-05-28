@@ -53,9 +53,6 @@ class CarrinhoControllerTest extends TestCase
 
     public function test_controller_estrutura_basica()
     {
-        // Testa apenas a estrutura básica do controller sem mockar Sessions complexas
-
-        // Assert - Verificar se os métodos existem
         $this->assertTrue(method_exists($this->controller, 'index'));
         $this->assertTrue(method_exists($this->controller, 'adicionar'));
         $this->assertTrue(method_exists($this->controller, 'atualizar'));
@@ -66,23 +63,19 @@ class CarrinhoControllerTest extends TestCase
         $this->assertTrue(method_exists($this->controller, 'checkout'));
         $this->assertTrue(method_exists($this->controller, 'finalizarPedido'));
 
-        // Assert - Verificar se os services foram injetados
         $this->assertInstanceOf(CarrinhoService::class, $this->carrinhoService);
         $this->assertInstanceOf(EstoqueService::class, $this->estoqueService);
         $this->assertInstanceOf(PedidoService::class, $this->pedidoService);
 
-        // Assert - Verificar se o controller foi instanciado
         $this->assertInstanceOf(CarrinhoController::class, $this->controller);
     }
 
     public function test_controller_tem_dependencias_corretas()
     {
-        // Arrange
         $reflection = new \ReflectionClass($this->controller);
         $constructor = $reflection->getConstructor();
         $parameters = $constructor->getParameters();
 
-        // Assert
         $this->assertCount(3, $parameters);
         $this->assertEquals('carrinhoService', $parameters[0]->getName());
         $this->assertEquals('estoqueService', $parameters[1]->getName());
@@ -94,10 +87,8 @@ class CarrinhoControllerTest extends TestCase
 
     public function test_controller_metodos_sao_publicos()
     {
-        // Arrange
         $reflection = new \ReflectionClass($this->controller);
 
-        // Assert
         $this->assertTrue($reflection->getMethod('index')->isPublic());
         $this->assertTrue($reflection->getMethod('adicionar')->isPublic());
         $this->assertTrue($reflection->getMethod('atualizar')->isPublic());
@@ -111,7 +102,6 @@ class CarrinhoControllerTest extends TestCase
 
     public function test_controller_services_injetados_corretamente()
     {
-        // Arrange
         $reflection = new \ReflectionClass($this->controller);
 
         $carrinhoProperty = $reflection->getProperty('carrinhoService');
@@ -123,12 +113,10 @@ class CarrinhoControllerTest extends TestCase
         $pedidoProperty = $reflection->getProperty('pedidoService');
         $pedidoProperty->setAccessible(true);
 
-        // Act
         $carrinhoService = $carrinhoProperty->getValue($this->controller);
         $estoqueService = $estoqueProperty->getValue($this->controller);
         $pedidoService = $pedidoProperty->getValue($this->controller);
 
-        // Assert
         $this->assertSame($this->carrinhoService, $carrinhoService);
         $this->assertSame($this->estoqueService, $estoqueService);
         $this->assertSame($this->pedidoService, $pedidoService);
@@ -136,10 +124,6 @@ class CarrinhoControllerTest extends TestCase
 
     public function test_metodos_dependem_de_sessions_testados_indiretamente()
     {
-        // Os métodos que dependem de Sessions e Models complexos são testados
-        // através de testes de integração ou feature tests
-
-        // Verificar se os métodos têm a assinatura correta
         $reflection = new \ReflectionClass($this->controller);
 
         $this->assertCount(0, $reflection->getMethod('index')->getParameters());
@@ -155,7 +139,6 @@ class CarrinhoControllerTest extends TestCase
 
     public function test_verificar_cep_valido()
     {
-        // Arrange
         $request = Mockery::mock(VerificarCepRequest::class);
         $request->shouldReceive('get')->with('cep')->andReturn('01310100');
 
@@ -169,16 +152,13 @@ class CarrinhoControllerTest extends TestCase
             ])
         ]);
 
-        // Act
         $response = $this->controller->verificarCep($request);
 
-        // Assert
         $this->assertInstanceOf(CepResource::class, $response);
     }
 
     public function test_verificar_cep_invalido()
     {
-        // Arrange
         $request = Mockery::mock(VerificarCepRequest::class);
         $request->shouldReceive('get')->with('cep')->andReturn('00000000');
 
@@ -186,19 +166,13 @@ class CarrinhoControllerTest extends TestCase
             'viacep.com.br/ws/00000000/json/' => Http::response(['erro' => true])
         ]);
 
-        // Act
         $response = $this->controller->verificarCep($request);
 
-        // Assert
         $this->assertInstanceOf(CepResource::class, $response);
     }
 
-    // Testes que dependem de mocking complexo de Models e Sessions são removidos
-    // e testados através de testes de integração ou feature tests
-
     public function test_remover_cupom()
     {
-        // Arrange
         Session::shouldReceive('forget')->with(['cupom_aplicado', 'desconto']);
         Session::shouldReceive('get')->with('carrinho', [])->andReturn([]);
 
@@ -206,10 +180,8 @@ class CarrinhoControllerTest extends TestCase
             ->once()
             ->andReturn(['subtotal' => 100, 'desconto' => 0, 'total' => 100]);
 
-        // Act
         $response = $this->controller->removerCupom();
 
-        // Assert
         $this->assertInstanceOf(CarrinhoResource::class, $response);
     }
 }

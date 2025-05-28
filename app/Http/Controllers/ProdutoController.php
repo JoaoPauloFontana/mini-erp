@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateProdutoRequest;
 use App\Services\EstoqueService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Constants\SystemConstants;
 
 class ProdutoController extends Controller
 {
@@ -19,7 +20,7 @@ class ProdutoController extends Controller
     {
         $this->estoqueService = $estoqueService;
     }
-    
+
     public function index()
     {
         $produtos = Produto::ativo()
@@ -45,7 +46,7 @@ class ProdutoController extends Controller
                 'descricao' => $request->descricao,
             ]);
 
-            if ($request->estoque_inicial > 0) {
+            if ($request->estoque_inicial > SystemConstants::MIN_QUANTITY) {
                 $this->estoqueService->criarOuAtualizarEstoque(
                     $produto->id,
                     null,
@@ -59,10 +60,10 @@ class ProdutoController extends Controller
                         $variacao = ProdutoVariacao::create([
                             'produto_id' => $produto->id,
                             'nome' => $variacaoData['nome'],
-                            'valor_adicional' => $variacaoData['valor_adicional'] ?? 0,
+                            'valor_adicional' => $variacaoData['valor_adicional'] ?? SystemConstants::VALOR_PADRAO_ZERO,
                         ]);
 
-                        if (isset($variacaoData['estoque']) && $variacaoData['estoque'] > 0) {
+                        if (isset($variacaoData['estoque']) && $variacaoData['estoque'] > SystemConstants::MIN_QUANTITY) {
                             $this->estoqueService->criarOuAtualizarEstoque(
                                 $produto->id,
                                 $variacao->id,
@@ -75,7 +76,7 @@ class ProdutoController extends Controller
         });
 
         return redirect()->route('produtos.index')
-            ->with('success', 'Produto criado com sucesso!');
+            ->with('success', SystemConstants::MSG_PRODUTO_CRIADO);
     }
 
     public function show(Produto $produto)
@@ -90,10 +91,10 @@ class ProdutoController extends Controller
             $variacao = ProdutoVariacao::create([
                 'produto_id' => $produto->id,
                 'nome' => $request->variacao_nome,
-                'valor_adicional' => $request->variacao_valor_adicional ?? 0,
+                'valor_adicional' => $request->variacao_valor_adicional ?? SystemConstants::VALOR_PADRAO_ZERO,
             ]);
 
-            if ($request->variacao_estoque > 0) {
+            if ($request->variacao_estoque > SystemConstants::MIN_QUANTITY) {
                 $this->estoqueService->criarOuAtualizarEstoque(
                     $produto->id,
                     $variacao->id,
@@ -103,7 +104,7 @@ class ProdutoController extends Controller
         });
 
         return redirect()->route('produtos.show', $produto)
-            ->with('success', 'Variação adicionada com sucesso!');
+            ->with('success', SystemConstants::MSG_VARIACAO_ADICIONADA);
     }
 
     public function edit(Produto $produto)
@@ -141,7 +142,7 @@ class ProdutoController extends Controller
                     if ($variacao && $variacao->produto_id == $produto->id) {
                         $variacao->update([
                             'nome' => $variacaoData['nome'],
-                            'valor_adicional' => $variacaoData['valor_adicional'] ?? 0,
+                            'valor_adicional' => $variacaoData['valor_adicional'] ?? SystemConstants::VALOR_PADRAO_ZERO,
                         ]);
 
                         if (isset($variacaoData['estoque'])) {
@@ -162,14 +163,14 @@ class ProdutoController extends Controller
         });
 
         return redirect()->route('produtos.show', $produto)
-            ->with('success', 'Produto atualizado com sucesso!');
+            ->with('success', SystemConstants::MSG_PRODUTO_ATUALIZADO);
     }
 
     public function destroy(Produto $produto)
     {
-        $produto->update(['ativo' => false]);
+        $produto->update(['ativo' => SystemConstants::PRODUTO_INATIVO]);
 
         return redirect()->route('produtos.index')
-            ->with('success', 'Produto removido com sucesso!');
+            ->with('success', SystemConstants::MSG_PRODUTO_REMOVIDO);
     }
 }

@@ -67,7 +67,8 @@ class WebhookControllerSimpleTest extends TestCase
     {
         // Assert
         $this->assertTrue(method_exists($this->controller, 'receberStatus'));
-        $this->assertTrue(method_exists($this->controller, 'testarWebhook'));
+        $this->assertTrue(method_exists($this->controller, 'testarWebhookForm'));
+        $this->assertTrue(method_exists($this->controller, 'testarWebhookPost'));
     }
 
     public function test_controller_usa_service_correto()
@@ -104,7 +105,8 @@ class WebhookControllerSimpleTest extends TestCase
 
         // Assert
         $this->assertTrue($reflection->hasMethod('receberStatus'));
-        $this->assertTrue($reflection->hasMethod('testarWebhook'));
+        $this->assertTrue($reflection->hasMethod('testarWebhookForm'));
+        $this->assertTrue($reflection->hasMethod('testarWebhookPost'));
         $this->assertTrue($reflection->hasProperty('pedidoService'));
     }
 
@@ -115,7 +117,8 @@ class WebhookControllerSimpleTest extends TestCase
 
         // Assert
         $this->assertTrue($reflection->getMethod('receberStatus')->isPublic());
-        $this->assertTrue($reflection->getMethod('testarWebhook')->isPublic());
+        $this->assertTrue($reflection->getMethod('testarWebhookForm')->isPublic());
+        $this->assertTrue($reflection->getMethod('testarWebhookPost')->isPublic());
     }
 
     public function test_propriedade_service_e_protegida()
@@ -153,13 +156,16 @@ class WebhookControllerSimpleTest extends TestCase
         // Arrange
         $reflection = new \ReflectionClass($this->controller);
         $receberStatusMethod = $reflection->getMethod('receberStatus');
-        $testarWebhookMethod = $reflection->getMethod('testarWebhook');
+        $testarWebhookFormMethod = $reflection->getMethod('testarWebhookForm');
+        $testarWebhookPostMethod = $reflection->getMethod('testarWebhookPost');
 
         // Assert
         $this->assertTrue($receberStatusMethod->isPublic());
-        $this->assertTrue($testarWebhookMethod->isPublic());
+        $this->assertTrue($testarWebhookFormMethod->isPublic());
+        $this->assertTrue($testarWebhookPostMethod->isPublic());
         $this->assertNotNull($receberStatusMethod);
-        $this->assertNotNull($testarWebhookMethod);
+        $this->assertNotNull($testarWebhookFormMethod);
+        $this->assertNotNull($testarWebhookPostMethod);
     }
 
     public function test_constructor_tem_parametros_corretos()
@@ -203,11 +209,13 @@ class WebhookControllerSimpleTest extends TestCase
         // Arrange
         $reflection = new \ReflectionClass($this->controller);
         $receberStatusMethod = $reflection->getMethod('receberStatus');
-        $testarWebhookMethod = $reflection->getMethod('testarWebhook');
+        $testarWebhookFormMethod = $reflection->getMethod('testarWebhookForm');
+        $testarWebhookPostMethod = $reflection->getMethod('testarWebhookPost');
 
         // Assert
         $this->assertCount(1, $receberStatusMethod->getParameters());
-        $this->assertCount(1, $testarWebhookMethod->getParameters());
+        $this->assertCount(0, $testarWebhookFormMethod->getParameters()); // GET não tem parâmetros
+        $this->assertCount(1, $testarWebhookPostMethod->getParameters()); // POST tem request
     }
 
     public function test_service_property_existe()

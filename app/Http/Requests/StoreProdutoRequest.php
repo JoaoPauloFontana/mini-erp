@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Constants\SystemConstants;
 
 class StoreProdutoRequest extends FormRequest
 {
@@ -22,14 +23,14 @@ class StoreProdutoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nome' => 'required|string|max:255',
-            'preco' => 'required|numeric|min:0',
+            'nome' => 'required|string|max:' . SystemConstants::MAX_STRING_LENGTH,
+            'preco' => 'required|numeric|min:' . SystemConstants::MIN_NUMERIC_VALUE,
             'descricao' => 'nullable|string',
-            'estoque_inicial' => 'nullable|integer|min:0',
+            'estoque_inicial' => 'nullable|integer|min:' . SystemConstants::MIN_QUANTITY,
             'variacoes' => 'nullable|array',
-            'variacoes.*.nome' => 'required_with:variacoes|string|max:255',
-            'variacoes.*.valor_adicional' => 'nullable|numeric|min:0',
-            'variacoes.*.estoque' => 'nullable|integer|min:0',
+            'variacoes.*.nome' => 'required_with:variacoes|string|max:' . SystemConstants::MAX_STRING_LENGTH,
+            'variacoes.*.valor_adicional' => 'nullable|numeric|min:' . SystemConstants::MIN_NUMERIC_VALUE,
+            'variacoes.*.estoque' => 'nullable|integer|min:' . SystemConstants::MIN_QUANTITY,
         ];
     }
 
@@ -42,14 +43,14 @@ class StoreProdutoRequest extends FormRequest
     {
         return [
             'nome.required' => 'O nome do produto é obrigatório.',
-            'nome.max' => 'O nome do produto não pode ter mais de 255 caracteres.',
+            'nome.max' => 'O nome do produto não pode ter mais de ' . SystemConstants::MAX_STRING_LENGTH . ' caracteres.',
             'preco.required' => 'O preço é obrigatório.',
             'preco.numeric' => 'O preço deve ser um número válido.',
             'preco.min' => 'O preço deve ser maior que zero.',
             'estoque_inicial.integer' => 'O estoque inicial deve ser um número inteiro.',
             'estoque_inicial.min' => 'O estoque inicial não pode ser negativo.',
             'variacoes.*.nome.required_with' => 'O nome da variação é obrigatório.',
-            'variacoes.*.nome.max' => 'O nome da variação não pode ter mais de 255 caracteres.',
+            'variacoes.*.nome.max' => 'O nome da variação não pode ter mais de ' . SystemConstants::MAX_STRING_LENGTH . ' caracteres.',
             'variacoes.*.valor_adicional.numeric' => 'O valor adicional deve ser um número válido.',
             'variacoes.*.valor_adicional.min' => 'O valor adicional não pode ser negativo.',
             'variacoes.*.estoque.integer' => 'O estoque da variação deve ser um número inteiro.',

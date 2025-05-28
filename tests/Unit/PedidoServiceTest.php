@@ -37,9 +37,6 @@ class PedidoServiceTest extends TestCase
 
     public function test_service_estrutura_basica()
     {
-        // Testa apenas a estrutura básica do service sem mockar Models complexos
-
-        // Assert - Verificar se os métodos existem
         $this->assertTrue(method_exists($this->pedidoService, 'criarPedido'));
         $this->assertTrue(method_exists($this->pedidoService, 'atualizarStatus'));
         $this->assertTrue(method_exists($this->pedidoService, 'cancelarPedido'));
@@ -48,22 +45,18 @@ class PedidoServiceTest extends TestCase
         $this->assertTrue(method_exists($this->pedidoService, 'incrementarUsoCupom'));
         $this->assertTrue(method_exists($this->pedidoService, 'logConfirmacao'));
 
-        // Assert - Verificar se os services foram injetados
         $this->assertInstanceOf(EstoqueService::class, $this->estoqueService);
         $this->assertInstanceOf(CarrinhoService::class, $this->carrinhoService);
 
-        // Assert - Verificar se o service foi instanciado
         $this->assertInstanceOf(PedidoService::class, $this->pedidoService);
     }
 
     public function test_service_tem_dependencias_corretas()
     {
-        // Arrange
         $reflection = new \ReflectionClass($this->pedidoService);
         $constructor = $reflection->getConstructor();
         $parameters = $constructor->getParameters();
 
-        // Assert
         $this->assertCount(2, $parameters);
         $this->assertEquals('estoqueService', $parameters[0]->getName());
         $this->assertEquals('carrinhoService', $parameters[1]->getName());
@@ -73,15 +66,12 @@ class PedidoServiceTest extends TestCase
 
     public function test_service_metodos_publicos_e_privados()
     {
-        // Arrange
         $reflection = new \ReflectionClass($this->pedidoService);
 
-        // Assert - Métodos públicos
         $this->assertTrue($reflection->getMethod('criarPedido')->isPublic());
         $this->assertTrue($reflection->getMethod('atualizarStatus')->isPublic());
         $this->assertTrue($reflection->getMethod('cancelarPedido')->isPublic());
 
-        // Assert - Métodos privados
         $this->assertTrue($reflection->getMethod('criarRegistroPedido')->isPrivate());
         $this->assertTrue($reflection->getMethod('processarItensCarrinho')->isPrivate());
         $this->assertTrue($reflection->getMethod('incrementarUsoCupom')->isPrivate());
@@ -90,10 +80,6 @@ class PedidoServiceTest extends TestCase
 
     public function test_metodos_dependem_de_models_testados_indiretamente()
     {
-        // Os métodos que dependem de Models e Requests complexos são testados
-        // através de testes de integração ou feature tests
-
-        // Verificar se os métodos têm a assinatura correta
         $reflection = new \ReflectionClass($this->pedidoService);
 
         $this->assertCount(2, $reflection->getMethod('criarPedido')->getParameters());

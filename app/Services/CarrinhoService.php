@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Produto;
+use App\Constants\SystemConstants;
 
 class CarrinhoService
 {
@@ -12,9 +13,9 @@ class CarrinhoService
     public function calcularTotais(array $carrinho): array
     {
         $subtotal = array_sum(array_column($carrinho, 'subtotal'));
-        $desconto = session('desconto', 0);
+        $desconto = session(SystemConstants::SESSION_DESCONTO, SystemConstants::VALOR_PADRAO_ZERO);
         $subtotalComDesconto = $subtotal - $desconto;
-        
+
         $frete = $this->calcularFrete($subtotalComDesconto);
 
         return [
@@ -30,12 +31,12 @@ class CarrinhoService
      */
     private function calcularFrete(float $valor): float
     {
-        if ($valor >= 200) {
-            return 0; 
-        } elseif ($valor >= 52 && $valor <= 166.59) {
-            return 15;
+        if ($valor >= SystemConstants::FRETE_GRATIS_LIMITE) {
+            return SystemConstants::FRETE_GRATIS_VALOR;
+        } elseif ($valor >= SystemConstants::FRETE_PROMOCIONAL_MIN && $valor <= SystemConstants::FRETE_PROMOCIONAL_MAX) {
+            return SystemConstants::FRETE_PROMOCIONAL_VALOR;
         } else {
-            return 20;
+            return SystemConstants::FRETE_NORMAL_VALOR;
         }
     }
 
@@ -44,7 +45,7 @@ class CarrinhoService
      */
     public function gerarChaveItem(int $produtoId, ?int $variacaoId): string
     {
-        return $produtoId . '_' . ($variacaoId ?? 'sem_variacao');
+        return $produtoId . SystemConstants::CARRINHO_SEPARADOR . ($variacaoId ?? SystemConstants::CARRINHO_SEM_VARIACAO);
     }
 
     /**
@@ -95,6 +96,10 @@ class CarrinhoService
      */
     public function limparCarrinho(): void
     {
-        session()->forget(['carrinho', 'cupom_aplicado', 'desconto']);
+        session()->forget([
+            SystemConstants::SESSION_CARRINHO,
+            SystemConstants::SESSION_CUPOM_APLICADO,
+            SystemConstants::SESSION_DESCONTO
+        ]);
     }
 }

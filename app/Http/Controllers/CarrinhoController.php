@@ -22,6 +22,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Exception;
+use App\Constants\SystemConstants;
 
 class CarrinhoController extends Controller
 {
@@ -41,9 +43,9 @@ class CarrinhoController extends Controller
 
     public function index()
     {
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
         $totais = $this->carrinhoService->calcularTotais($carrinho);
-        $cupom = session('cupom_aplicado');
+        $cupom = session(SystemConstants::SESSION_CUPOM_APLICADO);
 
         return view('carrinho.index', compact('carrinho', 'totais', 'cupom'));
     }
@@ -57,10 +59,10 @@ class CarrinhoController extends Controller
             $request->variacao_id,
             $request->quantidade
         )) {
-            return CarrinhoResource::error('Estoque insuficiente');
+            return CarrinhoResource::error(SystemConstants::MSG_ESTOQUE_INSUFICIENTE);
         }
 
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
         $chave = $this->carrinhoService->gerarChaveItem($request->produto_id, $request->variacao_id);
 
         if (isset($carrinho[$chave])) {
@@ -74,24 +76,24 @@ class CarrinhoController extends Controller
             );
         }
 
-        session(['carrinho' => $carrinho]);
+        session([SystemConstants::SESSION_CARRINHO => $carrinho]);
 
         $quantidadeTotal = $this->carrinhoService->calcularQuantidadeTotal($carrinho);
 
         return CarrinhoResource::success([
             'quantidade_carrinho' => $quantidadeTotal
-        ], 'Produto adicionado ao carrinho!');
+        ], SystemConstants::MSG_PRODUTO_ADICIONADO_CARRINHO);
     }
 
     public function atualizar(AtualizarCarrinhoRequest $request)
     {
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
 
         if (!isset($carrinho[$request->chave])) {
-            return CarrinhoResource::error('Item não encontrado no carrinho');
+            return CarrinhoResource::error(SystemConstants::MSG_ITEM_NAO_ENCONTRADO);
         }
 
-        if ($request->quantidade == 0) {
+        if ($request->quantidade == SystemConstants::ZERO_QUANTITY) {
             unset($carrinho[$request->chave]);
         } else {
             $carrinho[$request->chave]['quantidade'] = $request->quantidade;
@@ -99,7 +101,7 @@ class CarrinhoController extends Controller
                 $carrinho[$request->chave]['preco_unitario'] * $request->quantidade;
         }
 
-        session(['carrinho' => $carrinho]);
+        session([SystemConstants::SESSION_CARRINHO => $carrinho]);
 
         $totais = $this->carrinhoService->calcularTotais($carrinho);
         $quantidadeTotal = $this->carrinhoService->calcularQuantidadeTotal($carrinho);
@@ -107,16 +109,16 @@ class CarrinhoController extends Controller
         return CarrinhoResource::success([
             'totais' => $totais,
             'quantidade_carrinho' => $quantidadeTotal
-        ], 'Carrinho atualizado!');
+        ], SystemConstants::MSG_CARRINHO_ATUALIZADO);
     }
 
     public function remover(RemoverCarrinhoRequest $request)
     {
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
 
         if (isset($carrinho[$request->chave])) {
             unset($carrinho[$request->chave]);
-            session(['carrinho' => $carrinho]);
+            session([SystemConstants::SESSION_CARRINHO => $carrinho]);
         }
 
         $totais = $this->carrinhoService->calcularTotais($carrinho);
@@ -125,26 +127,26 @@ class CarrinhoController extends Controller
         return CarrinhoResource::success([
             'totais' => $totais,
             'quantidade_carrinho' => $quantidadeTotal
-        ], 'Item removido do carrinho!');
+        ], SystemConstants::MSG_ITEM_REMOVIDO_CARRINHO);
     }
 
     public function verificarCep(VerificarCepRequest $request)
     {
 
         try {
-            $response = Http::get("https://viacep.com.br/ws/{$request->cep}/json/");
+            $response = Http::get(SystemConstants::VIACEP_URL . "/{$request->cep}/json/");
 
             if ($response->successful()) {
                 $data = $response->json();
 
                 if (isset($data['erro'])) {
-                    return CepResource::error('CEP não encontrado');
+                    return CepResource::error(SystemConstants::MSG_CEP_NAO_ENCONTRADO);
                 }
 
-                return CepResource::success(['cep_data' => $data], 'CEP encontrado');
+                return CepResource::success(['cep_data' => $data], SystemConstants::MSG_CEP_ENCONTRADO);
             }
-        } catch (\Exception $e) {
-            return CepResource::error('Erro ao consultar CEP');
+        } catch (Exception $e) {
+            return CepResource::error(SystemConstants::MSG_ERRO_CONSULTAR_CEP);
         }
     }
 
@@ -157,10 +159,10 @@ class CarrinhoController extends Controller
             ->first();
 
         if (!$cupom) {
-            return CarrinhoResource::error('Cupom não encontrado ou inválido');
+            return CarrinhoResource::error(SystemConstants::MSG_CUPOM_INVALIDO);
         }
 
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
         $subtotal = array_sum(array_column($carrinho, 'subtotal'));
 
         $validacao = $cupom->validar($subtotal);
@@ -172,65 +174,65 @@ class CarrinhoController extends Controller
         $desconto = $cupom->calcularDesconto($subtotal);
 
         session([
-            'cupom_aplicado' => $cupom->toArray(),
-            'desconto' => $desconto
+            SystemConstants::SESSION_CUPOM_APLICADO => $cupom->toArray(),
+            SystemConstants::SESSION_DESCONTO => $desconto
         ]);
 
         $totais = $this->carrinhoService->calcularTotais($carrinho);
 
         return CarrinhoResource::success([
             'totais' => $totais
-        ], 'Cupom aplicado com sucesso!');
+        ], SystemConstants::MSG_CUPOM_APLICADO);
     }
 
     public function removerCupom()
     {
-        session()->forget(['cupom_aplicado', 'desconto']);
+        session()->forget([SystemConstants::SESSION_CUPOM_APLICADO, SystemConstants::SESSION_DESCONTO]);
 
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
         $totais = $this->carrinhoService->calcularTotais($carrinho);
 
         return CarrinhoResource::success([
             'totais' => $totais
-        ], 'Cupom removido');
+        ], SystemConstants::MSG_CUPOM_REMOVIDO);
     }
 
     public function checkout()
     {
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
 
         if (empty($carrinho)) {
             return redirect()->route('produtos.index')
-                ->with('error', 'Carrinho vazio');
+                ->with('error', SystemConstants::MSG_CARRINHO_VAZIO);
         }
 
         $totais = $this->carrinhoService->calcularTotais($carrinho);
-        $cupom = session('cupom_aplicado');
+        $cupom = session(SystemConstants::SESSION_CUPOM_APLICADO);
 
         return view('carrinho.checkout', compact('carrinho', 'totais', 'cupom'));
     }
 
     public function finalizarPedido(FinalizarPedidoRequest $request)
     {
-        $carrinho = session('carrinho', []);
+        $carrinho = session(SystemConstants::SESSION_CARRINHO, []);
 
         if ($this->carrinhoService->carrinhoVazio($carrinho)) {
             return redirect()->route('produtos.index')
-                ->with('error', 'Carrinho vazio');
+                ->with('error', SystemConstants::MSG_CARRINHO_VAZIO);
         }
 
         try {
             $pedido = $this->pedidoService->criarPedido($request, $carrinho);
 
-            session(['pedido_criado' => $pedido->id]);
+            session([SystemConstants::SESSION_PEDIDO_CRIADO => $pedido->id]);
 
             return redirect()->route('produtos.index')
-                ->with('success', 'Pedido realizado com sucesso! Você receberá um email de confirmação.');
+                ->with('success', SystemConstants::MSG_PEDIDO_REALIZADO);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()
                 ->withInput()
-                ->with('error', 'Erro ao processar pedido: ' . $e->getMessage());
+                ->with('error', SystemConstants::MSG_ERRO_PROCESSAR_PEDIDO . $e->getMessage());
         }
     }
 

@@ -39,15 +39,18 @@ class WebhookTest extends TestCase
 
         // Verificar se os métodos existem e têm a assinatura correta
         $this->assertTrue(method_exists($this->controller, 'receberStatus'));
-        $this->assertTrue(method_exists($this->controller, 'testarWebhook'));
+        $this->assertTrue(method_exists($this->controller, 'testarWebhookForm'));
+        $this->assertTrue(method_exists($this->controller, 'testarWebhookPost'));
 
         // Verificar estrutura dos métodos
         $reflection = new \ReflectionClass($this->controller);
         $receberStatusMethod = $reflection->getMethod('receberStatus');
-        $testarWebhookMethod = $reflection->getMethod('testarWebhook');
+        $testarWebhookFormMethod = $reflection->getMethod('testarWebhookForm');
+        $testarWebhookPostMethod = $reflection->getMethod('testarWebhookPost');
 
         $this->assertCount(1, $receberStatusMethod->getParameters());
-        $this->assertCount(1, $testarWebhookMethod->getParameters());
+        $this->assertCount(0, $testarWebhookFormMethod->getParameters()); // GET não tem parâmetros
+        $this->assertCount(1, $testarWebhookPostMethod->getParameters()); // POST tem request
     }
 
     public function test_webhook_controller_estrutura_basica()
@@ -56,7 +59,8 @@ class WebhookTest extends TestCase
 
         // Assert - Verificar se os métodos existem
         $this->assertTrue(method_exists($this->controller, 'receberStatus'));
-        $this->assertTrue(method_exists($this->controller, 'testarWebhook'));
+        $this->assertTrue(method_exists($this->controller, 'testarWebhookForm'));
+        $this->assertTrue(method_exists($this->controller, 'testarWebhookPost'));
 
         // Assert - Verificar se o service foi injetado
         $this->assertInstanceOf(PedidoService::class, $this->pedidoService);
@@ -85,7 +89,8 @@ class WebhookTest extends TestCase
 
         // Assert
         $this->assertTrue($reflection->getMethod('receberStatus')->isPublic());
-        $this->assertTrue($reflection->getMethod('testarWebhook')->isPublic());
+        $this->assertTrue($reflection->getMethod('testarWebhookForm')->isPublic());
+        $this->assertTrue($reflection->getMethod('testarWebhookPost')->isPublic());
     }
 
     public function test_webhook_controller_service_injetado_corretamente()

@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Enums\StatusPedido;
 
 class TesteWebhookRequest extends FormRequest
 {
@@ -22,8 +23,8 @@ class TesteWebhookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'pedido_id' => 'required|integer',
-            'status' => 'required|string'
+            'pedido_id' => 'required|integer|exists:pedidos,id',
+            'status' => 'required|string|in:' . implode(',', StatusPedido::values())
         ];
     }
 

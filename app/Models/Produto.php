@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Constants\SystemConstants;
 
 class Produto extends Model
 {
@@ -38,7 +39,7 @@ class Produto extends Model
     {
         if ($variacao_id) {
             $variacao = $this->variacoes()->find($variacao_id);
-            return $this->preco + ($variacao ? $variacao->valor_adicional : 0);
+            return $this->preco + ($variacao ? $variacao->valor_adicional : SystemConstants::VALOR_PADRAO_ZERO);
         }
         return $this->preco;
     }
@@ -49,11 +50,11 @@ class Produto extends Model
             ->where('variacao_id', $variacao_id)
             ->first();
 
-        return $estoque ? $estoque->quantidade : 0;
+        return $estoque ? $estoque->quantidade : SystemConstants::VALOR_PADRAO_ZERO;
     }
 
     public function scopeAtivo($query)
     {
-        return $query->where('ativo', true);
+        return $query->where('ativo', SystemConstants::PRODUTO_ATIVO_PADRAO);
     }
 }

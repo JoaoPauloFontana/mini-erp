@@ -7,6 +7,7 @@ use App\Models\Cupom;
 use App\Http\Requests\FinalizarPedidoRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class PedidoService
 {
@@ -70,11 +71,11 @@ class PedidoService
     {
         foreach ($carrinho as $item) {
             if (!$this->estoqueService->verificarDisponibilidade(
-                $item['produto_id'], 
-                $item['variacao_id'], 
+                $item['produto_id'],
+                $item['variacao_id'],
                 $item['quantidade']
             )) {
-                throw new \Exception("Estoque insuficiente para: " . $item['nome']);
+                throw new Exception("Estoque insuficiente para: " . $item['nome']);
             }
 
             $pedido->itens()->create([
@@ -86,8 +87,8 @@ class PedidoService
             ]);
 
             $this->estoqueService->reduzirEstoque(
-                $item['produto_id'], 
-                $item['variacao_id'], 
+                $item['produto_id'],
+                $item['variacao_id'],
                 $item['quantidade']
             );
         }

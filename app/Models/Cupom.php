@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enums\TipoCupom;
+use App\Constants\SystemConstants;
 
 class Cupom extends Model
 {
@@ -61,7 +63,7 @@ class Cupom extends Model
 
     public function calcularDesconto($subtotal)
     {
-        if ($this->tipo === 'percentual') {
+        if ($this->tipo === TipoCupom::PERCENTUAL->value) {
             return ($subtotal * $this->valor) / 100;
         } else {
             return min($this->valor, $subtotal);
@@ -70,12 +72,12 @@ class Cupom extends Model
 
     public function scopeAtivo($query)
     {
-        return $query->where('ativo', true);
+        return $query->where('ativo', SystemConstants::PRODUTO_ATIVO_PADRAO);
     }
 
     public function scopeValido($query)
     {
-        return $query->where('ativo', true)
+        return $query->where('ativo', SystemConstants::PRODUTO_ATIVO_PADRAO)
                     ->where('data_inicio', '<=', now())
                     ->where('data_fim', '>=', now());
     }
