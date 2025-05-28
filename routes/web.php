@@ -29,4 +29,5 @@ Route::prefix('carrinho')->name('carrinho.')->group(function () {
 
 // Webhook
 Route::post('/webhook/status', [WebhookController::class, 'receberStatus'])->name('webhook.status');
-Route::match(['GET', 'POST'], '/webhook/teste', [WebhookController::class, 'testarWebhook'])->name('webhook.teste');
+Route::get('/webhook/teste', [WebhookController::class, 'testarWebhookForm'])->name('webhook.teste');
+Route::post('/webhook/teste', [WebhookController::class, 'testarWebhookPost'])->name('webhook.teste.post');

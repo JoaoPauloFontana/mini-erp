@@ -19,6 +19,7 @@ class ProdutoController extends Controller
     {
         $this->estoqueService = $estoqueService;
     }
+    
     public function index()
     {
         $produtos = Produto::ativo()

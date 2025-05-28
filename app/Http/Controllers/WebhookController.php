@@ -20,6 +20,7 @@ class WebhookController extends Controller
     {
         $this->pedidoService = $pedidoService;
     }
+
     public function receberStatus(WebhookStatusRequest $request)
     {
 
@@ -56,19 +57,81 @@ class WebhookController extends Controller
         }
     }
 
-    public function testarWebhook(TesteWebhookRequest $request = null)
+    public function testarWebhookForm()
     {
-        if ($request && $request->isMethod('post')) {
-            $response = $this->receberStatus($request);
+        $pedidos = Pedido::orderBy('created_at', 'desc')->take(10)->get();
+        return view('webhook.teste', compact('pedidos'));
+    }
+
+    public function testarWebhookPost(TesteWebhookRequest $request)
+    {
+        Log::info("Teste webhook POST recebido", $request->all());
+
+        try {
+            $pedidoId = $request->pedido_id;
+            $novoStatus = $request->status;
+
+            Log::info("Processando webhook - Pedido ID: {$pedidoId}, Status: {$novoStatus}");
+
+            $pedido = Pedido::find($pedidoId);
+
+            if (!$pedido) {
+                Log::warning("Pedido {$pedidoId} não encontrado no teste");
+                $response = json_encode(['success' => false, 'message' => 'Pedido não encontrado']);
+                $statusCode = 404;
+            } else {
+                Log::info("Pedido encontrado no teste - ID: {$pedido->id}, Status atual: {$pedido->status}");
+
+                $statusAnterior = $pedido->status;
+
+                if ($novoStatus === 'cancelado') {
+                    $this->pedidoService->cancelarPedido($pedido);
+                    Log::info("Pedido {$pedido->id} cancelado via teste webhook");
+                    $response = json_encode([
+                        'success' => true,
+                        'message' => 'Pedido cancelado e removido',
+                        'pedido_id' => $pedidoId,
+                        'status_anterior' => $statusAnterior,
+                        'acao' => 'cancelado'
+                    ]);
+                } else {
+                    $this->pedidoService->atualizarStatus($pedido, $novoStatus);
+                    Log::info("Status do pedido {$pedido->id} atualizado para {$novoStatus} via teste webhook");
+
+                    $pedido->refresh();
+                    Log::info("Status após atualização no teste: {$pedido->status}");
+
+                    $response = json_encode([
+                        'success' => true,
+                        'message' => 'Status atualizado com sucesso',
+                        'pedido_id' => $pedidoId,
+                        'status_anterior' => $statusAnterior,
+                        'status_atual' => $pedido->status,
+                        'acao' => 'atualizado'
+                    ]);
+                }
+                $statusCode = 200;
+            }
+
+            $pedidos = Pedido::orderBy('created_at', 'desc')->take(10)->get();
 
             return view('webhook.teste', [
-                'response' => $response->getContent(),
-                'status_code' => $response->getStatusCode()
+                'pedidos' => $pedidos,
+                'response' => $response,
+                'status_code' => $statusCode
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error("Erro no teste webhook: " . $e->getMessage());
+            Log::error("Stack trace: " . $e->getTraceAsString());
+
+            $pedidos = Pedido::orderBy('created_at', 'desc')->take(10)->get();
+
+            return view('webhook.teste', [
+                'pedidos' => $pedidos,
+                'response' => json_encode(['success' => false, 'error' => $e->getMessage()]),
+                'status_code' => 500
             ]);
         }
-
-        $pedidos = Pedido::orderBy('created_at', 'desc')->take(10)->get();
-
-        return view('webhook.teste', compact('pedidos'));
     }
 }
