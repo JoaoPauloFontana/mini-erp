@@ -10,17 +10,11 @@ enum StatusPedido: string
     case ENTREGUE = 'entregue';
     case CANCELADO = 'cancelado';
 
-    /**
-     * Obter todos os valores como array
-     */
     public static function values(): array
     {
         return array_column(self::cases(), 'value');
     }
 
-    /**
-     * Obter labels amigáveis
-     */
     public function label(): string
     {
         return match($this) {
@@ -32,9 +26,6 @@ enum StatusPedido: string
         };
     }
 
-    /**
-     * Verificar se é um status válido
-     */
     public static function isValid(string $status): bool
     {
         return in_array($status, self::values());

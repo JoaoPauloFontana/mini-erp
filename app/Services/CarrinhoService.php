@@ -7,9 +7,6 @@ use App\Constants\SystemConstants;
 
 class CarrinhoService
 {
-    /**
-     * Calcular totais do carrinho
-     */
     public function calcularTotais(array $carrinho): array
     {
         $subtotal = array_sum(array_column($carrinho, 'subtotal'));
@@ -26,9 +23,6 @@ class CarrinhoService
         ];
     }
 
-    /**
-     * Calcular frete baseado no valor
-     */
     private function calcularFrete(float $valor): float
     {
         if ($valor >= SystemConstants::FRETE_GRATIS_LIMITE) {
@@ -40,17 +34,11 @@ class CarrinhoService
         }
     }
 
-    /**
-     * Gerar chave única para item do carrinho
-     */
     public function gerarChaveItem(int $produtoId, ?int $variacaoId): string
     {
         return $produtoId . SystemConstants::CARRINHO_SEPARADOR . ($variacaoId ?? SystemConstants::CARRINHO_SEM_VARIACAO);
     }
 
-    /**
-     * Criar item do carrinho
-     */
     public function criarItemCarrinho(Produto $produto, ?int $variacaoId, int $quantidade): array
     {
         $preco = $produto->getPrecoComVariacao($variacaoId);
@@ -67,33 +55,21 @@ class CarrinhoService
         ];
     }
 
-    /**
-     * Atualizar subtotal de um item
-     */
     public function atualizarSubtotal(array &$item): void
     {
         $item['subtotal'] = $item['preco_unitario'] * $item['quantidade'];
     }
 
-    /**
-     * Calcular quantidade total do carrinho
-     */
     public function calcularQuantidadeTotal(array $carrinho): int
     {
         return array_sum(array_column($carrinho, 'quantidade'));
     }
 
-    /**
-     * Verificar se carrinho está vazio
-     */
     public function carrinhoVazio(array $carrinho): bool
     {
         return empty($carrinho);
     }
 
-    /**
-     * Limpar carrinho da sessão
-     */
     public function limparCarrinho(): void
     {
         session()->forget([

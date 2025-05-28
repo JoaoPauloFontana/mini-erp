@@ -235,6 +235,4 @@ class CarrinhoController extends Controller
                 ->with('error', SystemConstants::MSG_ERRO_PROCESSAR_PEDIDO . $e->getMessage());
         }
     }
-
-
 }

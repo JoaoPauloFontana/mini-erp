@@ -7,11 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class TesteWebhookResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -22,9 +17,6 @@ class TesteWebhookResource extends JsonResource
         ];
     }
 
-    /**
-     * Criar resposta de sucesso
-     */
     public static function success(array $data, string $message = 'Operação realizada com sucesso'): self
     {
         return new self([
@@ -34,9 +26,6 @@ class TesteWebhookResource extends JsonResource
         ]);
     }
 
-    /**
-     * Criar resposta de erro
-     */
     public static function error(string $message, array $errors = null): self
     {
         $resource = [

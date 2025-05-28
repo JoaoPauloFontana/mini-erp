@@ -7,11 +7,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CepResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -43,9 +38,6 @@ class CepResource extends JsonResource
         ];
     }
 
-    /**
-     * Create a success response
-     */
     public static function success($data = [], $message = null)
     {
         return new static([
@@ -55,9 +47,6 @@ class CepResource extends JsonResource
         ]);
     }
 
-    /**
-     * Create an error response
-     */
     public static function error($message, $data = [])
     {
         return new static([

@@ -20,9 +20,6 @@ class PedidoService
         $this->carrinhoService = $carrinhoService;
     }
 
-    /**
-     * Criar pedido a partir do carrinho
-     */
     public function criarPedido(FinalizarPedidoRequest $request, array $carrinho): Pedido
     {
         return DB::transaction(function () use ($request, $carrinho) {
@@ -43,9 +40,6 @@ class PedidoService
         });
     }
 
-    /**
-     * Criar registro do pedido
-     */
     private function criarRegistroPedido(FinalizarPedidoRequest $request, array $totais, ?array $cupom): Pedido
     {
         return Pedido::create([
@@ -64,9 +58,6 @@ class PedidoService
         ]);
     }
 
-    /**
-     * Processar itens do carrinho
-     */
     private function processarItensCarrinho(Pedido $pedido, array $carrinho): void
     {
         foreach ($carrinho as $item) {
@@ -94,9 +85,6 @@ class PedidoService
         }
     }
 
-    /**
-     * Incrementar uso do cupom
-     */
     private function incrementarUsoCupom(?array $cupom): void
     {
         if ($cupom) {
@@ -104,17 +92,11 @@ class PedidoService
         }
     }
 
-    /**
-     * Log de confirmação
-     */
     private function logConfirmacao(string $email): void
     {
         Log::info("Email de confirmação enviado para: " . $email);
     }
 
-    /**
-     * Cancelar pedido e devolver estoque
-     */
     public function cancelarPedido(Pedido $pedido): void
     {
         DB::transaction(function () use ($pedido) {
@@ -130,9 +112,6 @@ class PedidoService
         });
     }
 
-    /**
-     * Atualizar status do pedido
-     */
     public function atualizarStatus(Pedido $pedido, string $novoStatus): void
     {
         $pedido->update(['status' => $novoStatus]);

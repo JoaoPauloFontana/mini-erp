@@ -13,7 +13,6 @@ class SystemConstants
     public const MIN_NUMERIC_VALUE = 0;
     public const MIN_QUANTITY = 0;
     public const ZERO_QUANTITY = 0;
-
     public const FRETE_GRATIS_LIMITE = 200.00;
     public const FRETE_PROMOCIONAL_MIN = 52.00;
     public const FRETE_PROMOCIONAL_MAX = 166.59;
