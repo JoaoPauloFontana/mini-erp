@@ -162,12 +162,10 @@
 $(document).ready(function() {
     var variacaoIndex = 0;
 
-    // Adicionar variação
     $('#btn-add-variacao').on('click', function() {
         adicionarVariacao();
     });
 
-    // Remover variação
     $(document).on('click', '.btn-remove-variacao', function() {
         $(this).closest('.variacao-item').remove();
         atualizarVisibilidadeVariacoes();
@@ -193,7 +191,6 @@ $(document).ready(function() {
         }
     }
 
-    // Inicializar visibilidade
     atualizarVisibilidadeVariacoes();
 });
 </script>

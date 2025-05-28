@@ -138,10 +138,8 @@ $(document).ready(function() {
         $.post('{{ route("carrinho.adicionar") }}', form.serialize())
             .done(function(response) {
                 if (response.success) {
-                    // Atualizar badge do carrinho
                     updateCartBadge(response.quantidade_carrinho);
                     
-                    // Mostrar mensagem de sucesso
                     showAlert('success', response.message);
                 } else {
                     showAlert('danger', response.error);

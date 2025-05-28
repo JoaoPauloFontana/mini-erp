@@ -262,7 +262,6 @@ function confirmarExclusao(id, nome) {
 
 function confirmarExclusaoVariacao(id, nome) {
     if (confirm('Tem certeza que deseja excluir a variação "' + nome + '"?')) {
-        // Implementar exclusão de variação via AJAX se necessário
         alert('Funcionalidade de exclusão de variação será implementada');
     }
 }

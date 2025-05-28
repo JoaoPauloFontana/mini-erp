@@ -121,14 +121,12 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <script>
-        // Configurar CSRF token para AJAX
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
-        // Auto-hide alerts
         $('.alert').each(function() {
             var alert = $(this);
             setTimeout(function() {
@@ -136,7 +134,6 @@
             }, 5000);
         });
 
-        // Função para mostrar alertas
         function showAlert(type, message) {
             var iconClass = type === 'success' ? 'bi-check-circle' : 'bi-exclamation-triangle';
             var alert = $('<div class="alert alert-' + type + ' alert-dismissible fade show" role="alert">' +
@@ -151,7 +148,6 @@
             }, 5000);
         }
 
-        // Função para atualizar badge do carrinho
         function updateCartBadge(quantity) {
             var badge = $('#carrinho-badge');
             if (quantity > 0) {
@@ -161,7 +157,6 @@
             }
         }
 
-        // Função para formatar moeda
         function formatCurrency(value) {
             return new Intl.NumberFormat('pt-BR', {
                 style: 'currency',

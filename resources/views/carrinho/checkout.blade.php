@@ -192,14 +192,12 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Máscara para CEP
     $('#cep').on('input', function() {
         var value = $(this).val().replace(/\D/g, '');
         value = value.replace(/^(\d{5})(\d)/, '$1-$2');
         $(this).val(value);
     });
 
-    // Buscar CEP
     $('#btn-buscar-cep, #cep').on('click keypress', function(e) {
         if (e.type === 'click' || e.which === 13) {
             e.preventDefault();
@@ -207,7 +205,6 @@ $(document).ready(function() {
         }
     });
 
-    // Auto-completar endereço quando campos são preenchidos
     $('#logradouro, #numero, #complemento, #bairro, #cidade').on('input', function() {
         atualizarEnderecoCompleto();
     });

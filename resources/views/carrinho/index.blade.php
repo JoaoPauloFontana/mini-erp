@@ -153,7 +153,6 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Atualizar quantidade
     $('.btn-quantidade').on('click', function() {
         var btn = $(this);
         var acao = btn.data('acao');
@@ -171,7 +170,6 @@ $(document).ready(function() {
         atualizarQuantidade(input.data('chave'), quantidade);
     });
 
-    // Atualizar quantidade via input
     $('.quantidade-input').on('change', function() {
         var input = $(this);
         var quantidade = parseInt(input.val());
@@ -184,13 +182,11 @@ $(document).ready(function() {
         atualizarQuantidade(input.data('chave'), quantidade);
     });
 
-    // Remover item
     $('.btn-remover').on('click', function() {
         var chave = $(this).data('chave');
         removerItem(chave);
     });
 
-    // Aplicar cupom
     $('#btn-aplicar-cupom').on('click', function() {
         var codigo = $('#codigo-cupom').val().trim();
         if (codigo) {
@@ -198,7 +194,6 @@ $(document).ready(function() {
         }
     });
 
-    // Remover cupom
     $('#btn-remover-cupom').on('click', function() {
         removerCupom();
     });
