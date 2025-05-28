@@ -5,16 +5,13 @@ use App\Http\Controllers\ProdutoController;
 use App\Http\Controllers\CarrinhoController;
 use App\Http\Controllers\WebhookController;
 
-// Página inicial - redireciona para produtos
 Route::get('/', function () {
     return redirect()->route('produtos.index');
 });
 
-// Rotas de produtos
 Route::resource('produtos', ProdutoController::class);
 Route::post('produtos/{produto}/variacao', [ProdutoController::class, 'adicionarVariacao'])->name('produtos.adicionar-variacao');
 
-// Rotas do carrinho
 Route::prefix('carrinho')->name('carrinho.')->group(function () {
     Route::get('/', [CarrinhoController::class, 'index'])->name('index');
     Route::post('/adicionar', [CarrinhoController::class, 'adicionar'])->name('adicionar');
@@ -27,7 +24,6 @@ Route::prefix('carrinho')->name('carrinho.')->group(function () {
     Route::post('/cep', [CarrinhoController::class, 'verificarCep'])->name('cep');
 });
 
-// Webhook
 Route::post('/webhook/status', [WebhookController::class, 'receberStatus'])->name('webhook.status');
 Route::get('/webhook/teste', [WebhookController::class, 'testarWebhookForm'])->name('webhook.teste');
 Route::post('/webhook/teste', [WebhookController::class, 'testarWebhookPost'])->name('webhook.teste.post');
