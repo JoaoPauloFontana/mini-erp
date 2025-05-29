@@ -11,6 +11,7 @@ Um sistema completo de ERP desenvolvido em **Laravel** com **Bootstrap** para ge
 - **Cálculo de Frete**: Regras automáticas baseadas no valor do pedido
 - **Verificação de CEP**: Integração com API ViaCEP
 - **Webhook**: API para atualização de status de pedidos
+- **Sistema de E-mail**: Confirmação automática de pedidos por e-mail
 - **Interface Responsiva**: Design moderno com Bootstrap 5
 
 ## 🛠️ Tecnologias Utilizadas
@@ -145,7 +146,37 @@ Content-Type: application/json
 ### Teste do Webhook
 Acesse `/webhook/teste` para testar o webhook manualmente.
 
-## 📊 Regras de Negócio
+## � Sistema de E-mail
+
+### Confirmação de Pedidos
+- ✅ E-mail automático enviado ao finalizar pedido
+- ✅ Template HTML responsivo e profissional
+- ✅ Dados completos do cliente e endereço de entrega
+- ✅ Lista detalhada de itens do pedido
+- ✅ Resumo financeiro (subtotal, desconto, frete, total)
+
+### Configuração
+```bash
+# Testar sistema de e-mail
+docker exec mini_erp_app php artisan email:testar
+
+# Testar com pedido específico
+docker exec mini_erp_app php artisan email:testar 123
+
+# Testar para e-mail específico
+docker exec mini_erp_app php artisan email:testar --email=teste@exemplo.com
+```
+
+### Estrutura do E-mail
+- **Cabeçalho**: Logo e título do sistema
+- **Informações do Pedido**: Número, data, status, forma de pagamento
+- **Dados do Cliente**: Nome, e-mail, telefone
+- **Endereço de Entrega**: CEP e endereço completo preenchido pelo cliente
+- **Itens do Pedido**: Tabela com produtos, variações, quantidades e preços
+- **Totais**: Subtotal, desconto, frete e total final
+- **Rodapé**: Informações de contato e suporte
+
+## �📊 Regras de Negócio
 
 ### Frete
 - **Grátis**: Pedidos ≥ R$ 200,00
@@ -200,7 +231,7 @@ O sistema vem com dados de exemplo:
 
 ## 🧪 Testes Unitários
 
-O sistema possui uma suíte completa de **124 testes unitários** com **100% de sucesso** e **368 assertions** validadas.
+O sistema possui uma suíte completa de **132 testes unitários** com **100% de sucesso** e **396 assertions** validadas.
 
 ### 📊 Cobertura de Testes
 
@@ -213,12 +244,13 @@ O sistema possui uma suíte completa de **124 testes unitários** com **100% de 
 - **EstoqueService**: 6 testes (validações, lógica de negócio)
 - **CarrinhoService**: 19 testes (cálculos, frete, totais)
 - **PedidoService**: 24 testes (estrutura, dependências, métodos)
+- **EmailService**: 8 testes (envio de e-mails, validações)
 
 ### 🚀 Como Executar os Testes
 
 #### Executar Todos os Testes
 ```bash
-# Executar toda a suíte de testes unitários (124 testes)
+# Executar toda a suíte de testes unitários (132 testes)
 docker exec mini_erp_app php artisan test tests/Unit/
 
 # Executar com informações de cobertura
@@ -249,6 +281,9 @@ docker exec mini_erp_app php artisan test tests/Unit/CarrinhoServiceTest.php
 
 # Pedido Service (20 testes)
 docker exec mini_erp_app php artisan test tests/Unit/PedidoServiceSimpleTest.php
+
+# Email Service (8 testes)
+docker exec mini_erp_app php artisan test tests/Unit/EmailServiceTest.php
 ```
 
 **Testes Adicionais:**
@@ -295,8 +330,8 @@ docker exec mini_erp_app php artisan test tests/Unit/CarrinhoControllerTest.php
 ### 🎯 Resultados dos Testes
 
 ```
-✅ 124 testes PASSANDO (100% de sucesso)
-✅ 368 assertions validadas
+✅ 132 testes PASSANDO (100% de sucesso)
+✅ 396 assertions validadas
 ✅ 11 arquivos de teste funcionais
 ✅ 0 falhas - Cobertura completa
 ```
@@ -315,6 +350,7 @@ docker exec mini_erp_app php artisan test tests/Unit/CarrinhoControllerTest.php
 | ProdutoControllerTest | 6 | 18 | ✅ 100% |
 | PedidoServiceTest | 4 | 29 | ✅ 100% |
 | CarrinhoControllerTest | 8 | 44 | ✅ 100% |
+| EmailServiceTest | 8 | 19 | ✅ 100% |
 
 ### 🔧 Configuração de Testes
 
@@ -342,8 +378,8 @@ $ docker exec mini_erp_app php artisan test tests/Unit/
   ✓ calcular totais com frete promocional
   ... (19 testes)
 
-  Tests:    124 passed (368 assertions)
-  Duration: 0.92s
+  Tests:    132 passed (396 assertions)
+  Duration: 0.90s
 ```
 
 ## 🚀 Como Testar a Aplicação

@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Constants\SystemConstants;
 
 class Produto extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'nome',
         'preco',

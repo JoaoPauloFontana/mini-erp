@@ -6,6 +6,7 @@ use Tests\TestCase;
 use App\Services\PedidoService;
 use App\Services\EstoqueService;
 use App\Services\CarrinhoService;
+use App\Services\EmailService;
 use Mockery;
 
 class PedidoServiceSimpleTest extends TestCase
@@ -13,13 +14,15 @@ class PedidoServiceSimpleTest extends TestCase
     protected $pedidoService;
     protected $estoqueService;
     protected $carrinhoService;
+    protected $emailService;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->estoqueService = Mockery::mock(EstoqueService::class);
         $this->carrinhoService = Mockery::mock(CarrinhoService::class);
-        $this->pedidoService = new PedidoService($this->estoqueService, $this->carrinhoService);
+        $this->emailService = Mockery::mock(EmailService::class);
+        $this->pedidoService = new PedidoService($this->estoqueService, $this->carrinhoService, $this->emailService);
     }
 
     protected function tearDown(): void
@@ -56,11 +59,13 @@ class PedidoServiceSimpleTest extends TestCase
         $constructor = $reflection->getConstructor();
         $parameters = $constructor->getParameters();
 
-        $this->assertCount(2, $parameters);
+        $this->assertCount(3, $parameters);
         $this->assertEquals('estoqueService', $parameters[0]->getName());
         $this->assertEquals('carrinhoService', $parameters[1]->getName());
+        $this->assertEquals('emailService', $parameters[2]->getName());
         $this->assertEquals(EstoqueService::class, $parameters[0]->getType()->getName());
         $this->assertEquals(CarrinhoService::class, $parameters[1]->getType()->getName());
+        $this->assertEquals(EmailService::class, $parameters[2]->getType()->getName());
     }
 
     public function test_metodos_publicos_existem()
@@ -71,15 +76,15 @@ class PedidoServiceSimpleTest extends TestCase
         $this->assertTrue(method_exists($this->pedidoService, 'criarRegistroPedido'));
         $this->assertTrue(method_exists($this->pedidoService, 'processarItensCarrinho'));
         $this->assertTrue(method_exists($this->pedidoService, 'incrementarUsoCupom'));
-        $this->assertTrue(method_exists($this->pedidoService, 'logConfirmacao'));
     }
 
     public function test_service_funciona_com_mock_dependencies()
     {
         $mockEstoqueService = Mockery::mock(EstoqueService::class);
         $mockCarrinhoService = Mockery::mock(CarrinhoService::class);
+        $mockEmailService = Mockery::mock(EmailService::class);
 
-        $service = new PedidoService($mockEstoqueService, $mockCarrinhoService);
+        $service = new PedidoService($mockEstoqueService, $mockCarrinhoService, $mockEmailService);
 
         $this->assertInstanceOf(PedidoService::class, $service);
     }
@@ -99,6 +104,7 @@ class PedidoServiceSimpleTest extends TestCase
         $this->assertTrue($reflection->hasMethod('cancelarPedido'));
         $this->assertTrue($reflection->hasProperty('estoqueService'));
         $this->assertTrue($reflection->hasProperty('carrinhoService'));
+        $this->assertTrue($reflection->hasProperty('emailService'));
     }
 
     public function test_metodos_sao_publicos()
@@ -116,6 +122,7 @@ class PedidoServiceSimpleTest extends TestCase
 
         $this->assertTrue($reflection->getProperty('estoqueService')->isProtected());
         $this->assertTrue($reflection->getProperty('carrinhoService')->isProtected());
+        $this->assertTrue($reflection->getProperty('emailService')->isProtected());
     }
 
     public function test_service_namespace_correto()
@@ -131,11 +138,13 @@ class PedidoServiceSimpleTest extends TestCase
         $constructor = $reflection->getConstructor();
         $parameters = $constructor->getParameters();
 
-        $this->assertCount(2, $parameters);
+        $this->assertCount(3, $parameters);
         $this->assertTrue($parameters[0]->hasType());
         $this->assertTrue($parameters[1]->hasType());
+        $this->assertTrue($parameters[2]->hasType());
         $this->assertFalse($parameters[0]->isOptional());
         $this->assertFalse($parameters[1]->isOptional());
+        $this->assertFalse($parameters[2]->isOptional());
     }
 
     public function test_dependencias_sao_obrigatorias()
@@ -148,6 +157,8 @@ class PedidoServiceSimpleTest extends TestCase
         $this->assertFalse($parameters[0]->allowsNull());
         $this->assertFalse($parameters[1]->isOptional());
         $this->assertFalse($parameters[1]->allowsNull());
+        $this->assertFalse($parameters[2]->isOptional());
+        $this->assertFalse($parameters[2]->allowsNull());
     }
 
     public function test_service_implementa_interface_correta()
@@ -172,8 +183,9 @@ class PedidoServiceSimpleTest extends TestCase
     {
         $mockEstoqueService = Mockery::mock(EstoqueService::class);
         $mockCarrinhoService = Mockery::mock(CarrinhoService::class);
+        $mockEmailService = Mockery::mock(EmailService::class);
 
-        $service = new PedidoService($mockEstoqueService, $mockCarrinhoService);
+        $service = new PedidoService($mockEstoqueService, $mockCarrinhoService, $mockEmailService);
 
         $this->assertInstanceOf(PedidoService::class, $service);
         $this->assertNotNull($service);
@@ -194,7 +206,6 @@ class PedidoServiceSimpleTest extends TestCase
         $this->assertTrue($reflection->hasMethod('criarRegistroPedido'));
         $this->assertTrue($reflection->hasMethod('processarItensCarrinho'));
         $this->assertTrue($reflection->hasMethod('incrementarUsoCupom'));
-        $this->assertTrue($reflection->hasMethod('logConfirmacao'));
     }
 
     public function test_service_usa_services_corretos()
@@ -205,6 +216,7 @@ class PedidoServiceSimpleTest extends TestCase
 
         $this->assertEquals(EstoqueService::class, $parameters[0]->getType()->getName());
         $this->assertEquals(CarrinhoService::class, $parameters[1]->getType()->getName());
+        $this->assertEquals(EmailService::class, $parameters[2]->getType()->getName());
     }
 
     public function test_service_tem_todos_metodos_necessarios()
@@ -215,8 +227,7 @@ class PedidoServiceSimpleTest extends TestCase
             'cancelarPedido',
             'criarRegistroPedido',
             'processarItensCarrinho',
-            'incrementarUsoCupom',
-            'logConfirmacao'
+            'incrementarUsoCupom'
         ];
 
         foreach ($expectedMethods as $method) {
@@ -230,5 +241,6 @@ class PedidoServiceSimpleTest extends TestCase
 
         $this->assertTrue($reflection->hasProperty('estoqueService'));
         $this->assertTrue($reflection->hasProperty('carrinhoService'));
+        $this->assertTrue($reflection->hasProperty('emailService'));
     }
 }

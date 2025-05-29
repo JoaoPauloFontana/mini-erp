@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Enums\StatusPedido;
 
 class Pedido extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'numero_pedido',
         'cliente_nome',

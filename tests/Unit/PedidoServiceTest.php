@@ -6,6 +6,7 @@ use Tests\TestCase;
 use App\Services\PedidoService;
 use App\Services\EstoqueService;
 use App\Services\CarrinhoService;
+use App\Services\EmailService;
 use App\Models\Pedido;
 use App\Models\PedidoItem;
 use App\Models\Cupom;
@@ -20,13 +21,15 @@ class PedidoServiceTest extends TestCase
     protected $pedidoService;
     protected $estoqueService;
     protected $carrinhoService;
+    protected $emailService;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->estoqueService = Mockery::mock(EstoqueService::class);
         $this->carrinhoService = Mockery::mock(CarrinhoService::class);
-        $this->pedidoService = new PedidoService($this->estoqueService, $this->carrinhoService);
+        $this->emailService = Mockery::mock(EmailService::class);
+        $this->pedidoService = new PedidoService($this->estoqueService, $this->carrinhoService, $this->emailService);
     }
 
     protected function tearDown(): void
@@ -43,7 +46,6 @@ class PedidoServiceTest extends TestCase
         $this->assertTrue(method_exists($this->pedidoService, 'criarRegistroPedido'));
         $this->assertTrue(method_exists($this->pedidoService, 'processarItensCarrinho'));
         $this->assertTrue(method_exists($this->pedidoService, 'incrementarUsoCupom'));
-        $this->assertTrue(method_exists($this->pedidoService, 'logConfirmacao'));
 
         $this->assertInstanceOf(EstoqueService::class, $this->estoqueService);
         $this->assertInstanceOf(CarrinhoService::class, $this->carrinhoService);
@@ -57,11 +59,13 @@ class PedidoServiceTest extends TestCase
         $constructor = $reflection->getConstructor();
         $parameters = $constructor->getParameters();
 
-        $this->assertCount(2, $parameters);
+        $this->assertCount(3, $parameters);
         $this->assertEquals('estoqueService', $parameters[0]->getName());
         $this->assertEquals('carrinhoService', $parameters[1]->getName());
+        $this->assertEquals('emailService', $parameters[2]->getName());
         $this->assertEquals(EstoqueService::class, $parameters[0]->getType()->getName());
         $this->assertEquals(CarrinhoService::class, $parameters[1]->getType()->getName());
+        $this->assertEquals(EmailService::class, $parameters[2]->getType()->getName());
     }
 
     public function test_service_metodos_publicos_e_privados()
@@ -75,7 +79,6 @@ class PedidoServiceTest extends TestCase
         $this->assertTrue($reflection->getMethod('criarRegistroPedido')->isPrivate());
         $this->assertTrue($reflection->getMethod('processarItensCarrinho')->isPrivate());
         $this->assertTrue($reflection->getMethod('incrementarUsoCupom')->isPrivate());
-        $this->assertTrue($reflection->getMethod('logConfirmacao')->isPrivate());
     }
 
     public function test_metodos_dependem_de_models_testados_indiretamente()
@@ -88,6 +91,5 @@ class PedidoServiceTest extends TestCase
         $this->assertCount(3, $reflection->getMethod('criarRegistroPedido')->getParameters());
         $this->assertCount(2, $reflection->getMethod('processarItensCarrinho')->getParameters());
         $this->assertCount(1, $reflection->getMethod('incrementarUsoCupom')->getParameters());
-        $this->assertCount(1, $reflection->getMethod('logConfirmacao')->getParameters());
     }
 }

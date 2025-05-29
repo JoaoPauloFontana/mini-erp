@@ -11,13 +11,20 @@ use Exception;
 
 class PedidoService
 {
-    protected $estoqueService;
-    protected $carrinhoService;
+    protected EstoqueService $estoqueService;
 
-    public function __construct(EstoqueService $estoqueService, CarrinhoService $carrinhoService)
-    {
+    protected CarrinhoService $carrinhoService;
+
+    protected EmailService $emailService;
+
+    public function __construct(
+        EstoqueService $estoqueService,
+        CarrinhoService $carrinhoService,
+        EmailService $emailService
+    ) {
         $this->estoqueService = $estoqueService;
         $this->carrinhoService = $carrinhoService;
+        $this->emailService = $emailService;
     }
 
     public function criarPedido(FinalizarPedidoRequest $request, array $carrinho): Pedido
@@ -34,7 +41,19 @@ class PedidoService
 
             $this->carrinhoService->limparCarrinho();
 
-            $this->logConfirmacao($request->cliente_email);
+            try {
+                $this->emailService->enviarConfirmacaoPedido($pedido);
+                Log::info('E-mail de confirmação enviado com sucesso', [
+                    'pedido_id' => $pedido->id,
+                    'cliente_email' => $request->cliente_email
+                ]);
+            } catch (Exception $e) {
+                Log::error('Falha ao enviar e-mail de confirmação', [
+                    'pedido_id' => $pedido->id,
+                    'cliente_email' => $request->cliente_email,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             return $pedido;
         });
@@ -92,11 +111,6 @@ class PedidoService
         }
     }
 
-    private function logConfirmacao(string $email): void
-    {
-        Log::info("Email de confirmação enviado para: " . $email);
-    }
-
     public function cancelarPedido(Pedido $pedido): void
     {
         DB::transaction(function () use ($pedido) {
@@ -114,6 +128,18 @@ class PedidoService
 
     public function atualizarStatus(Pedido $pedido, string $novoStatus): void
     {
+        $statusAnterior = $pedido->status;
         $pedido->update(['status' => $novoStatus]);
+
+        try {
+            $this->emailService->enviarAtualizacaoStatus($pedido, $statusAnterior, $novoStatus);
+        } catch (Exception $e) {
+            Log::error('Falha ao enviar e-mail de atualização de status', [
+                'pedido_id' => $pedido->id,
+                'status_anterior' => $statusAnterior,
+                'novo_status' => $novoStatus,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }
